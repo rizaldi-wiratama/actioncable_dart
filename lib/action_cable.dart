@@ -32,6 +32,8 @@ class ActionCable {
     this.onConnectionLost,
     this.onCannotConnect,
   }) {
+    // assign last ping when first connect websocket
+    _lastPing = DateTime.now();
     // rails gets a ping every 3 seconds
     _socketChannel = IOWebSocketChannel.connect(url,
         headers: headers, pingInterval: Duration(seconds: 3));
@@ -51,9 +53,6 @@ class ActionCable {
   // check if there is no ping for 3 seconds and signal a [onConnectionLost] if
   // there is no ping for more than 6 seconds
   void healthCheck(_) {
-    if (_lastPing == null) {
-      return;
-    }
     if (DateTime.now().difference(_lastPing!) > Duration(seconds: 6)) {
       this.disconnect();
       if (this.onConnectionLost != null) this.onConnectionLost!();
